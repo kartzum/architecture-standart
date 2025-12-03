@@ -1,0 +1,70 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(admin, "Администратор", "Администратор ИТ-систем банка")
+Person(call_center_employee, "Сотрудник call-центра", "Оператор call-центра")
+Person(back_office_manager, "Менеджер бэк-офиса", "Сотрудник бэк-офиса банка")
+Person(client, "Клиент", "Клиент банка")
+
+System_Boundary(standard_system, "Система «Стандарт»") {
+    Container(int, "Интернет-банк", "ASP.NET MVC 4.5, .NET Framework 4.5", "Предоставляет информацию и функционал интернет-банка")
+    ContainerDb(int_db, "База данных интернет-банк", "MS SQL", "Хранит данные пользователей интернет-банка, платежи, информацию о картах")
+
+    Container(abs_client, "Клиент АБС", "Delphi", "Клиентское приложение автоматизированной банковской системы")
+    Container(abs_server, "АБС Сервер", "Серверное ПО", "Автоматизированная банковская система для учета операций и бухгалтерии")
+    ContainerDb(abs_db, "База данных АБС", "Oracle", "Хранит бухгалтерские данные, операции по счетам")
+
+    Container(cc_frontend, "Веб-интерфейс call-центра", "React.js", "Фронтенд система управления call-центром")
+    Container(cc_backend, "Бэкенд call-центра", "Java Spring Boot", "API и бизнес-логика call-центра")
+    ContainerDb(cc_db, "База данных call-центра", "PostgreSQL", "Хранит данные о звонках, клиентах, операторах")
+
+    Container(site, "Сайт", "PHP и React.js", "Предоставляет информацию")
+
+    Container(sms, "СМС-шлюз", "", "")
+' new
+
+    Container(bl, "Load Balancer", "Распределение трафика")
+    Container(api, "API Gateway", "")
+    Container(deposit_backend, "Управление депозитами", "ASP.NET MVC 4.5, .NET Framework 4.5")
+    Container(deposit_db, "База данных управления депозитами", "MS SQL")
+    Container(mb, "Брокер", "RabbitMQ")
+}
+
+System_Ext(pcc, "Партнерский call-центр", "Партнерский call-центр")
+System_Ext(telecom, "Телеком-оператор", "Телеком-оператор")
+
+Rel(cc_backend, sms, "Запросы", "")
+Rel(sms, telecom, "Запросы", "")
+
+Rel(int, int_db, "Запросы", "")
+
+Rel(abs_client, abs_server, "Запросы", "")
+Rel(abs_server, abs_db, "Запросы", "")
+
+Rel(client, pcc, "Обращается за поддержкой", "Телефония")
+
+Rel(cc_frontend, cc_backend, "Запросы", "")
+Rel(cc_backend, cc_db, "Запросы", "")
+
+Rel(client, bl, "Запросы", "")
+Rel(admin, bl, "Запросы", "")
+Rel(back_office_manager, bl, "Запросы", "")
+Rel(call_center_employee, cc_frontend, "Запросы", "")
+
+Rel(bl, site, "Запросы", "")
+Rel(site, api, "Запросы", "")
+
+Rel(api, int, "Запросы", "")
+Rel(bl, abs_client, "Запросы", "")
+
+Rel(deposit_backend, deposit_db, "Запросы", "")
+
+Rel(api, deposit_backend, "Запросы", "")
+
+Rel(int, abs_server, "Интеграция", "")
+
+Rel(deposit_backend, mb, "Публикует/получает сообщения", "")
+
+Rel(int, mb, "Публикует/получает сообщения", "")
+
+@enduml
