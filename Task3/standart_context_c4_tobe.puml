@@ -1,0 +1,57 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title Система «Стандарт»
+
+Person(admin, "Администратор", "Администратор ИТ-систем банка")
+Person(call_center_employee, "Сотрудник call-центра", "Оператор call-центра")
+Person(back_office_manager, "Менеджер бэк-офиса", "Сотрудник бэк-офиса банка")
+Person(client, "Клиент", "Клиент банка")
+
+System(int, "Интернет-банк", "ASP.NET MVC 4.5, .NET Framework 4.5")
+System(abs, "АБС", "АБС")
+System(cc, "Система управления call-центром", "Система управления call-центром")
+System_Ext(pcc, "Партнерский call-центр", "Партнерский call-центр")
+System(sms, "СМС-шлюз", "СМС-шлюз")
+System_Ext(telecom, "Телеком-оператор", "Телеком-оператор")
+System(site, "Сайт", "PHP и React.js")
+
+' new
+System(bl, "Load Balancer", "Распределение трафика")
+System(api, "API Gateway", "")
+System(deposit, "Управление депозитами", "ASP.NET MVC 4.5, .NET Framework 4.5")
+System(mb, "Брокер", "RabbitMQ")
+
+' client + new
+Rel(client, bl, "Запросы", "HTTP/HTTPS")
+Rel(client, pcc, "Обращается за поддержкой", "Телефония")
+
+Rel(bl, site, "Запросы", "HTTP/HTTPS")
+Rel(site, api, "Запросы", "HTTP/HTTPS")
+Rel(api, deposit, "Запросы", "HTTP/HTTPS")
+Rel(api, int, "Запросы", "HTTP/HTTPS")
+
+' admin + new
+Rel(admin, cc, "Администрирует call-центр", "HTTPS")
+Rel(admin, bl, "Запросы", "HTTP/HTTPS")
+
+' call_center_employee
+Rel(call_center_employee, cc, "Обслуживает клиентов", "HTTPS")
+
+' back_office_manager + new
+Rel(back_office_manager, bl, "Работает с операциями", "")
+
+' systems + new
+
+Rel(cc, sms, "Запросы", "")
+Rel(sms, telecom, "Запросы", "")
+
+Rel(bl, abs, "Запросы", "")
+
+Rel(int, abs, "Интеграция", "")
+
+Rel(deposit, mb, "Публикует/получает сообщения", "")
+
+Rel(int, mb, "Публикует/получает сообщения", "")
+
+@enduml

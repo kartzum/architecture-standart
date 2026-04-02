@@ -1,0 +1,60 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(admin, "Администратор", "Администратор ИТ-систем банка")
+Person(call_center_employee, "Сотрудник call-центра", "Оператор call-центра")
+Person(back_office_manager, "Менеджер бэк-офиса", "Сотрудник бэк-офиса банка")
+Person(client, "Клиент", "Клиент банка")
+
+System_Boundary(standard_system, "Система «Стандарт»") {
+    Container(int, "Интернет-банк", "ASP.NET MVC 4.5, .NET Framework 4.5", "Предоставляет информацию и функционал интернет-банка")
+    ContainerDb(int_db, "База данных интернет-банк", "MS SQL", "Хранит данные пользователей интернет-банка, платежи, информацию о картах")
+
+    Container(abs_client, "Клиент АБС", "Delphi", "Клиентское приложение автоматизированной банковской системы")
+    Container(abs_server, "АБС Сервер", "Серверное ПО", "Автоматизированная банковская система для учета операций и бухгалтерии")
+    ContainerDb(abs_db, "База данных АБС", "Oracle", "Хранит бухгалтерские данные, операции по счетам")
+
+    Container(cc_frontend, "Веб-интерфейс call-центра", "React.js", "Фронтенд система управления call-центром")
+    Container(cc_backend, "Бэкенд call-центра", "Java Spring Boot", "API и бизнес-логика call-центра")
+    ContainerDb(cc_db, "База данных call-центра", "PostgreSQL", "Хранит данные о звонках, клиентах, операторах")
+
+    Container(site, "Сайт", "PHP и React.js", "Предоставляет информацию")
+
+    Container(sms, "СМС-шлюз", "", "")
+}
+
+System_Ext(pcc, "Партнерский call-центр", "Партнерский call-центр")
+
+System_Ext(telecom, "Телеком-оператор", "Телеком-оператор")
+
+' client
+Rel(client, site, "Просматривает информацию, использует интернет-банк", "HTTP/HTTPS")
+Rel(client, pcc, "Обращается за поддержкой", "Телефония")
+
+' admin
+Rel(admin, int, "Администрирует контент", "HTTPS")
+Rel(admin, abs_client, "Администрирует систему", "LAN")
+Rel(admin, cc_frontend, "Администрирует call-центр", "HTTPS")
+Rel(admin, site, "Администрирует контент", "HTTP/HTTPS")
+
+' call_center_employee
+Rel(call_center_employee, cc_frontend, "Обслуживает клиентов", "HTTPS")
+
+' back_office_manager
+Rel(back_office_manager, abs_client, "Работает с бухгалтерией и операциями", "LAN")
+
+' systems
+
+Rel(int, int_db, "Чтение/запись данных", "ADO.NET")
+Rel(int, abs_server, "Интеграция: запрос операций, открытие счетов", "SOAP/REST")
+Rel(abs_client, abs_server, "Взаимодействие с сервером АБС", "LAN")
+Rel(abs_server, abs_db, "Чтение/запись бухгалтерских данных", "JDBC")
+Rel(cc_frontend, cc_backend, "API вызовы", "REST/HTTPS")
+Rel(cc_backend, cc_db, "Чтение/запись данных call-центра", "JDBC")
+
+Rel(site, int, "Запросы", "HTTP/HTTPS")
+
+Rel(cc_backend, sms, "Запросы", "")
+Rel(sms, telecom, "Запросы", "")
+
+@enduml
